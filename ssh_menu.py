@@ -9,7 +9,7 @@ import os
 if __name__ == '__main__':
   sys.path.append( os.path.join(os.path.dirname(__file__), "../.."))
 
-import gtk
+from gi.repository import Gtk
 import terminatorlib.plugin as plugin
 from terminatorlib.config import Config
 from terminatorlib.translation import _
@@ -45,15 +45,15 @@ class SSHMenu(plugin.MenuItem):
                             )
     def callback(self, menuitems, menu, terminal):
         """Add our menu items to the menu"""
-        item = gtk.MenuItem(_('SSH Menu'))
+        item = Gtk.MenuItem(_('SSH Menu'))
         item.connect("activate", self.menu, terminal)
         menuitems.append(item)
 
 
-      #  submenu = gtk.Menu()
+      #  submenu = Gtk.Menu()
       #  item.set_submenu(submenu)
 
-      #  menuitem = gtk.ImageMenuItem(gtk.STOCK_PREFERENCES)
+      #  menuitem = Gtk.ImageMenuItem(Gtk.STOCK_PREFERENCES)
       #  menuitem.connect("activate", self.configure)
       #  submenu.append(menuitem)
 
@@ -84,15 +84,16 @@ class SSHMenu(plugin.MenuItem):
       command = model.get_value(iter,1)
       if command[len(command)-1] != '\n':
         command = command + '\n'
-      data['terminal'].vte.feed_child(command)
+      length=len(command)
+      data['terminal'].vte.feed_child(command, length)
 
 
     def menu(self, widget, terminal, data = None):
       ui = {}
 
-      window = gtk.Window()
-      scroll = gtk.ScrolledWindow(None, None)
-      scroll.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_ALWAYS)
+      window = Gtk.Window()
+      scroll = Gtk.ScrolledWindow(None, None)
+      scroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.ALWAYS)
       #scroll.set_border_width(1)
 
 
@@ -102,13 +103,13 @@ class SSHMenu(plugin.MenuItem):
       window.set_resizable(True)
       #window. set_decorated(False)
        # Create a new button
-      buttonsbox = gtk.HBox(False, 0)
-      box1 = gtk.VBox(False, 0)
+      buttonsbox = Gtk.HBox(False, 0)
+      box1 = Gtk.VBox(False, 0)
 
-      button = gtk.Button("Close", gtk.STOCK_CLOSE)
-      button.connect_object("clicked", gtk.Widget.destroy, window)
+      button = Gtk.Button("Close", Gtk.STOCK_CLOSE)
+      button.connect_object("clicked", Gtk.Widget.destroy, window)
 
-      buttonPreferences = gtk.Button("Close", gtk.STOCK_PREFERENCES)
+      buttonPreferences = Gtk.Button("Configure", Gtk.STOCK_PREFERENCES)
       buttonPreferences.connect("clicked", self.configure)
       
 
@@ -118,21 +119,21 @@ class SSHMenu(plugin.MenuItem):
 
 
       
-      store = gtk.TreeStore(str,str)
+      store = Gtk.TreeStore(str,str)
       rabbit = store.append(None, ["Main","men"])
       for command in self.cmd_list:
         store.append(rabbit,[command['name'], command['command']])
  
-      treeview = gtk.TreeView(store)
+      treeview = Gtk.TreeView(store)
       selection = treeview.get_selection()
-      selection.set_mode(gtk.SELECTION_SINGLE)
+      selection.set_mode(Gtk.SelectionMode.SINGLE)
 
       selection.connect("changed", self._save_order, {'terminal' : terminal, 'selection' : selection })
       treeview.connect("row-activated", self._execute, {'terminal' : terminal, 'selection' : selection })
       ui['treeview'] = treeview
 
-      renderer = gtk.CellRendererText()
-      column = gtk.TreeViewColumn("Hosts", renderer, text=CC_COL_NAME)
+      renderer = Gtk.CellRendererText()
+      column = Gtk.TreeViewColumn("Hosts", renderer, text=CC_COL_NAME)
 
 
       treeview.append_column(column)
@@ -143,21 +144,21 @@ class SSHMenu(plugin.MenuItem):
       treeview.set_enable_search(True)
 
 
-      hbox = gtk.HBox()
-      hbox.pack_start(treeview)
+      hbox = Gtk.HBox()
+      hbox.pack_start(treeview, True, True, 0)
 
-      outbox = gtk.VBox(False, 0)
+      outbox = Gtk.VBox(False, 0)
 
 
 
-      inbox = gtk.VBox(False, 0)
+      inbox = Gtk.VBox(False, 0)
       inbox.pack_start(scroll, True, True, 5)
       inbox.pack_start(box1,False, False, 8)
 
 
       scroll.add_with_viewport(hbox)
       scroll.show()
-      outbox.pack_start(inbox)
+      outbox.pack_start(inbox, True, True, 0)
       window.add(outbox)
       window.show_all()
 
@@ -165,88 +166,88 @@ class SSHMenu(plugin.MenuItem):
 
     def configure(self, widget, data = None):
       ui = {}
-      window = gtk.Dialog(
+      window = Gtk.Dialog(
                       _("SSH Menu Configuration"),
                       None,
-                      gtk.DIALOG_MODAL,
+                      Gtk.DialogFlags.MODAL,
                       (
-                        gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT,
-                        gtk.STOCK_OK, gtk.RESPONSE_ACCEPT
+                        Gtk.STOCK_CANCEL, Gtk.ResponseType.REJECT,
+                        Gtk.STOCK_OK, Gtk.ResponseType.ACCEPT
                       )
                     )
-      store = gtk.ListStore(str, str)
+      store = Gtk.ListStore(str, str)
 
       for command in self.cmd_list:
         store.append([command['name'], command['command']])
  
-      treeview = gtk.TreeView(store)
+      treeview = Gtk.TreeView(store)
       #treeview.connect("cursor-changed", self.on_cursor_changed, ui)
       selection = treeview.get_selection()
-      selection.set_mode(gtk.SELECTION_SINGLE)
+      selection.set_mode(Gtk.SelectionMode.SINGLE)
       selection.connect("changed", self.on_selection_changed, ui)
       ui['treeview'] = treeview
 
-      renderer = gtk.CellRendererText()
-      column = gtk.TreeViewColumn("Name", renderer, text=CC_COL_NAME)
+      renderer = Gtk.CellRendererText()
+      column = Gtk.TreeViewColumn("Name", renderer, text=CC_COL_NAME)
       treeview.append_column(column)
 
-      renderer = gtk.CellRendererText()
-      column = gtk.TreeViewColumn("Command", renderer, text=CC_COL_COMMAND)
+      renderer = Gtk.CellRendererText()
+      column = Gtk.TreeViewColumn("Command", renderer, text=CC_COL_COMMAND)
       treeview.append_column(column)
 
-      hbox = gtk.HBox()
-      hbox.pack_start(treeview)
-      window.vbox.pack_start(hbox)
+      hbox = Gtk.HBox()
+      hbox.pack_start(treeview, True, True, 0)
+      window.vbox.pack_start(hbox, True, True, 0)
 
-      button_box = gtk.VBox()
+      button_box = Gtk.VBox()
 
-      button = gtk.Button(stock=gtk.STOCK_GOTO_TOP)
-      button_box.pack_start(button, False, True)
+      button = Gtk.Button(stock=Gtk.STOCK_GOTO_TOP)
+      button_box.pack_start(button, False, True, 0)
       button.connect("clicked", self.on_goto_top, ui) 
       button.set_sensitive(False)
       ui['button_top'] = button
 
-      button = gtk.Button(stock=gtk.STOCK_GO_UP)
-      button_box.pack_start(button, False, True)
+      button = Gtk.Button(stock=Gtk.STOCK_GO_UP)
+      button_box.pack_start(button, False, True, 0)
       button.connect("clicked", self.on_go_up, ui)
       button.set_sensitive(False)
       ui['button_up'] = button
 
-      button = gtk.Button(stock=gtk.STOCK_GO_DOWN)
-      button_box.pack_start(button, False, True)
+      button = Gtk.Button(stock=Gtk.STOCK_GO_DOWN)
+      button_box.pack_start(button, False, True, 0)
       button.connect("clicked", self.on_go_down, ui) 
       button.set_sensitive(False)
       ui['button_down'] = button
 
-      button = gtk.Button(stock=gtk.STOCK_GOTO_LAST)
-      button_box.pack_start(button, False, True)
+      button = Gtk.Button(stock=Gtk.STOCK_GOTO_LAST)
+      button_box.pack_start(button, False, True, 0)
       button.connect("clicked", self.on_goto_last, ui) 
       button.set_sensitive(False)
       ui['button_last'] = button
 
-      button = gtk.Button(stock=gtk.STOCK_NEW)
-      button_box.pack_start(button, False, True)
+      button = Gtk.Button(stock=Gtk.STOCK_NEW)
+      button_box.pack_start(button, False, True, 0)
       button.connect("clicked", self.on_new, ui) 
       ui['button_new'] = button
 
-      button = gtk.Button(stock=gtk.STOCK_EDIT)
-      button_box.pack_start(button, False, True)
+      button = Gtk.Button(stock=Gtk.STOCK_EDIT)
+      button_box.pack_start(button, False, True, 0)
       button.set_sensitive(False)
       button.connect("clicked", self.on_edit, ui) 
       ui['button_edit'] = button
 
-      button = gtk.Button(stock=gtk.STOCK_DELETE)
-      button_box.pack_start(button, False, True)
+      button = Gtk.Button(stock=Gtk.STOCK_DELETE)
+      button_box.pack_start(button, False, True, 0)
       button.connect("clicked", self.on_delete, ui) 
       button.set_sensitive(False)
       ui['button_delete'] = button
 
 
 
-      hbox.pack_start(button_box)
+      hbox.pack_start(button_box, True, True, 0)
       window.show_all()
       res = window.run()
-      if res == gtk.RESPONSE_ACCEPT:
+      if res == Gtk.ResponseType.ACCEPT:
         #we save the config
         iter = store.get_iter_first()
         self.cmd_list = []
@@ -282,38 +283,38 @@ class SSHMenu(plugin.MenuItem):
       data['button_delete'].set_sensitive(iter is not None)
 
     def _create_command_dialog(self, name_var = "", command_var = ""):
-      dialog = gtk.Dialog(
+      dialog = Gtk.Dialog(
                         _("New Command"),
                         None,
-                        gtk.DIALOG_MODAL,
+                        Gtk.DialogFlags.MODAL,
                         (
-                          gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT,
-                          gtk.STOCK_OK, gtk.RESPONSE_ACCEPT
+                          Gtk.STOCK_CANCEL, Gtk.ResponseType.REJECT,
+                          Gtk.STOCK_OK, Gtk.ResponseType.ACCEPT
                         )
                       )
-      table = gtk.Table(3, 2)
+      table = Gtk.Table(3, 2)
 
-      label = gtk.Label(_("Name:"))
+      label = Gtk.Label(label=_("Name:"))
       table.attach(label, 0, 1, 1, 2)
-      name = gtk.Entry()
+      name = Gtk.Entry()
       name.set_text(name_var)
       table.attach(name, 1, 2, 1, 2)
       
-      label = gtk.Label(_("Command:"))
+      label = Gtk.Label(label=_("Command:"))
       table.attach(label, 0, 1, 2, 3)
-      command = gtk.Entry()
+      command = Gtk.Entry()
       command.set_text(command_var)
       table.attach(command, 1, 2, 2, 3)
 
-      dialog.vbox.pack_start(table)
+      dialog.vbox.pack_start(table, True, True, 0)
       dialog.show_all()
       return (dialog,name,command)
 
     def _error(self, msg):
-      err = gtk.MessageDialog(dialog,
-                              gtk.DIALOG_MODAL,
-                              gtk.MESSAGE_ERROR,
-                              gtk.BUTTONS_CLOSE,
+      err = Gtk.MessageDialog(dialog,
+                              Gtk.DialogFlags.MODAL,
+                              Gtk.MessageType.ERROR,
+                              Gtk.ButtonsType.CLOSE,
                               msg
                             )
       err.run()
@@ -326,14 +327,14 @@ class SSHMenu(plugin.MenuItem):
       (dialog,name,command) = self._create_command_dialog()
       res = dialog.run()
       item = {}
-      if res == gtk.RESPONSE_ACCEPT:
+      if res == Gtk.ResponseType.ACCEPT:
         item['name'] = name.get_text()
         item['command'] = command.get_text()
         if item['name'] == '' or item['command'] == '':
-          err = gtk.MessageDialog(dialog,
-                                  gtk.DIALOG_MODAL,
-                                  gtk.MESSAGE_ERROR,
-                                  gtk.BUTTONS_CLOSE,
+          err = Gtk.MessageDialog(dialog,
+                                  Gtk.DialogFlags.MODAL,
+                                  Gtk.MessageType.ERROR,
+                                  Gtk.ButtonsType.CLOSE,
                                   _("You need to define a name and command")
                                 )
           err.run()
@@ -434,14 +435,14 @@ class SSHMenu(plugin.MenuItem):
                                                                   )
       res = dialog.run()
       item = {}
-      if res == gtk.RESPONSE_ACCEPT:
+      if res == Gtk.ResponseType.ACCEPT:
         item['name'] = name.get_text()
         item['command'] = command.get_text()
         if item['name'] == '' or item['command'] == '':
-          err = gtk.MessageDialog(dialog,
-                                  gtk.DIALOG_MODAL,
-                                  gtk.MESSAGE_ERROR,
-                                  gtk.BUTTONS_CLOSE,
+          err = Gtk.MessageDialog(dialog,
+                                  Gtk.DialogFlags.MODAL,
+                                  Gtk.MessageType.ERROR,
+                                  Gtk.ButtonsType.CLOSE,
                                   _("You need to define a name and command")
                                 )
           err.run()
@@ -468,5 +469,5 @@ class SSHMenu(plugin.MenuItem):
 if __name__ == '__main__':
   c = SSHMenu()
   c.configure(None, None)
-  gtk.main()
+  Gtk.main()
 
