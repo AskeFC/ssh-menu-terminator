@@ -1,7 +1,8 @@
-#!/usr/bin/python
-# Terminator by Chris Jones <cmsj@tenshu.net>
-# GPL v2 only
-"""ssh_menu.py - Terminator Plugin to add an SSH Menu"""
+# ssh_menu.py - Terminator plugin to add an SSH / command menu
+#
+# Original version by Mario Lameiras, 2014
+# GTK3 port by Dan MacDonald, 2017
+
 import sys
 import os
 
@@ -15,7 +16,7 @@ from terminatorlib.config import Config
 from terminatorlib.translation import _
 from terminatorlib.util import get_config_dir
 
-(CC_COL_NAME, CC_COL_COMMAND) = range(0,2)
+(CC_COL_NAME, CC_COL_COMMAND, CC_COL_GROUP) = range(0,3)
 
 # Every plugin you want Terminator to load *must* be listed in 'AVAILABLE'
 AVAILABLE = ['SSHMenu']
@@ -38,9 +39,11 @@ class SSHMenu(plugin.MenuItem):
           continue
         name = s["name"]
         command = s["command"]
+        group = s["group"]
         self.cmd_list.append(
                               { 'name' : name,
-                                'command' : command
+                                'command' : command,
+                                'group' : group
                               }
                             )
     def callback(self, menuitems, menu, terminal):
@@ -65,10 +68,12 @@ class SSHMenu(plugin.MenuItem):
       while i < length:
         name = self.cmd_list[i]['name']
         command = self.cmd_list[i]['command']
+        group = self.cmd_list[i]['group']
        
         item = {}
         item['name'] = name
         item['command'] = command
+        item['group'] = group
 
         config.plugin_set(self.__class__.__name__, name, item)
         config.save()
@@ -119,10 +124,10 @@ class SSHMenu(plugin.MenuItem):
 
 
       
-      store = Gtk.TreeStore(str,str)
-      rabbit = store.append(None, ["Main","men"])
+      store = Gtk.TreeStore(str,str,str)
+      rabbit = store.append(None, ["Main","blah","blah"])
       for command in self.cmd_list:
-        store.append(rabbit,[command['name'], command['command']])
+        store.append(rabbit,[command['name'], command['command'], command['group']])
  
       treeview = Gtk.TreeView(store)
       selection = treeview.get_selection()
@@ -175,10 +180,10 @@ class SSHMenu(plugin.MenuItem):
                         Gtk.STOCK_OK, Gtk.ResponseType.ACCEPT
                       )
                     )
-      store = Gtk.ListStore(str, str)
+      store = Gtk.ListStore(str, str, str)
 
       for command in self.cmd_list:
-        store.append([command['name'], command['command']])
+        store.append([command['name'], command['command'], command['group']])
  
       treeview = Gtk.TreeView(store)
       #treeview.connect("cursor-changed", self.on_cursor_changed, ui)
@@ -193,6 +198,10 @@ class SSHMenu(plugin.MenuItem):
 
       renderer = Gtk.CellRendererText()
       column = Gtk.TreeViewColumn("Command", renderer, text=CC_COL_COMMAND)
+      treeview.append_column(column)
+      
+      renderer = Gtk.CellRendererText()
+      column = Gtk.TreeViewColumn("Group", renderer, text=CC_COL_GROUP)
       treeview.append_column(column)
 
       hbox = Gtk.HBox()
@@ -252,12 +261,14 @@ class SSHMenu(plugin.MenuItem):
         iter = store.get_iter_first()
         self.cmd_list = []
         while iter:
-          (name, command) = store.get(iter,
+          (name, command, group) = store.get(iter,
                                               CC_COL_NAME,
-                                              CC_COL_COMMAND)
+                                              CC_COL_COMMAND,
+                                              CC_COL_GROUP)
           self.cmd_list.append(
                             {'name': name,
-                            'command' : command}
+                            'command' : command,
+                            'group' : group}
                               )
           iter = store.iter_next(iter)
         self._save_config()
@@ -282,7 +293,7 @@ class SSHMenu(plugin.MenuItem):
       data['button_edit'].set_sensitive(iter is not None)
       data['button_delete'].set_sensitive(iter is not None)
 
-    def _create_command_dialog(self, name_var = "", command_var = ""):
+    def _create_command_dialog(self, name_var = "", command_var = "", group_var = ""):
       dialog = Gtk.Dialog(
                         _("New Command"),
                         None,
@@ -305,10 +316,16 @@ class SSHMenu(plugin.MenuItem):
       command = Gtk.Entry()
       command.set_text(command_var)
       table.attach(command, 1, 2, 2, 3)
+      
+      label = Gtk.Label(label=_("Group:"))
+      table.attach(label, 0, 1, 3, 4)
+      group = Gtk.Entry()
+      command.set_text(group_var)
+      table.attach(group, 1, 2, 3, 4)
 
       dialog.vbox.pack_start(table, True, True, 0)
       dialog.show_all()
-      return (dialog,name,command)
+      return (dialog,name,command,group)
 
     def _error(self, msg):
       err = Gtk.MessageDialog(dialog,
@@ -324,12 +341,13 @@ class SSHMenu(plugin.MenuItem):
 
 
     def on_new(self, button, data):
-      (dialog,name,command) = self._create_command_dialog()
+      (dialog,name,command,group) = self._create_command_dialog()
       res = dialog.run()
       item = {}
       if res == Gtk.ResponseType.ACCEPT:
         item['name'] = name.get_text()
         item['command'] = command.get_text()
+        item['group'] = group.get_text()
         if item['name'] == '' or item['command'] == '':
           err = Gtk.MessageDialog(dialog,
                                   Gtk.DialogFlags.MODAL,
@@ -350,7 +368,7 @@ class SSHMenu(plugin.MenuItem):
               break
             iter = store.iter_next(iter)
           if not name_exist:
-            store.append((item['name'], item['command']))
+            store.append((item['name'], item['command'], item['group']))
           else:
             self._err(_("Name *%s* already exist") % item['name'])
       dialog.destroy()
@@ -429,21 +447,23 @@ class SSHMenu(plugin.MenuItem):
       if not iter:
         return
        
-      (dialog,name,command) = self._create_command_dialog(
+      (dialog,name,command,group) = self._create_command_dialog(
                                                 name_var = store.get_value(iter, CC_COL_NAME),
-                                                command_var = store.get_value(iter, CC_COL_COMMAND)
+                                                command_var = store.get_value(iter, CC_COL_COMMAND),
+                                                group_var = store.get_value(iter, CC_COL_GROUP)
                                                                   )
       res = dialog.run()
       item = {}
       if res == Gtk.ResponseType.ACCEPT:
         item['name'] = name.get_text()
         item['command'] = command.get_text()
-        if item['name'] == '' or item['command'] == '':
+        item['group'] = group.get_text()
+        if item['name'] == '' or item['command'] == '' or item['group'] == '':
           err = Gtk.MessageDialog(dialog,
                                   Gtk.DialogFlags.MODAL,
                                   Gtk.MessageType.ERROR,
                                   Gtk.ButtonsType.CLOSE,
-                                  _("You need to define a name and command")
+                                  _("You need to define a name, command and group")
                                 )
           err.run()
           err.destroy()
@@ -458,7 +478,8 @@ class SSHMenu(plugin.MenuItem):
           if not name_exist:
             store.set(iter,
                       CC_COL_NAME, item['name'],
-                      CC_COL_COMMAND, item['command']
+                      CC_COL_COMMAND, item['command'],
+                      CC_COL_GROUP, item['group']
                       )
           else:
             self._err(_("Name *%s* already exist") % item['name'])
