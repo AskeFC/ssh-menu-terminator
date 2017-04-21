@@ -3,8 +3,8 @@ SSH Menu
 
 SSH Menu is a SSH menu plugin for Terminator v1.9 (ie GTK3 based versions) or later.
 
-Install
--------
+Installation
+------------
 
 Installing SSH Menu is as simple as copying ssh_menu.py to ~/.config/terminator/plugins/ and then enabling it under Terminator's Plugins tab, under Preferences.
 
@@ -22,6 +22,8 @@ Development
 
 If you want to debug or help develop this plugin, start Terminator from any non-Terminator terminal emulator with the command:
 
- terminator -dd --debug-classes SSHMenu
+```
+terminator -dd --debug-classes SSHMenu
+```
  
 Like terminator, this plugin was created with Python 2 and GTK 3.
