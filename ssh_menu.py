@@ -122,12 +122,19 @@ class SSHMenu(plugin.MenuItem):
       buttonsbox.pack_end(buttonPreferences, True, False, 0)
       box1.pack_start(buttonsbox, False, False, 0)
 
-
+      allgroups = []
+      groupnum = len(self.cmd_list)
+      for elem in range(groupnum):
+		  allgroups.append(self.cmd_list[elem]['group'])
+      groups = list(set(allgroups))
       
       store = Gtk.TreeStore(str,str,str)
-      rabbit = store.append(None, ["Main","blah","blah"])
-      for command in self.cmd_list:
-        store.append(rabbit,[command['name'], command['command'], command['group']])
+      
+      for group in groups:
+		  rabbit = store.append(None, [group,"blah","blah"])
+		  subgroup = [d for d in self.cmd_list if d['group'] == group]
+		  for command in subgroup:
+			  store.append(rabbit,[command['name'], command['command'], command['group']])
  
       treeview = Gtk.TreeView(store)
       selection = treeview.get_selection()
