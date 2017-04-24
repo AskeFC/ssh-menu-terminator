@@ -80,8 +80,8 @@ class SSHMenu(plugin.MenuItem):
         i = i + 1
 
 
-    def _save_order(self,selection, data):
-      print "todo!"
+    #def _save_order(self,selection, data):
+     # print "todo!"
 
 
     def _execute(self, treeview, path, view_column, data):
@@ -140,12 +140,12 @@ class SSHMenu(plugin.MenuItem):
       selection = treeview.get_selection()
       selection.set_mode(Gtk.SelectionMode.SINGLE)
 
-      selection.connect("changed", self._save_order, {'terminal' : terminal, 'selection' : selection })
+      #selection.connect("changed", self._save_order, {'terminal' : terminal, 'selection' : selection })
       treeview.connect("row-activated", self._execute, {'terminal' : terminal, 'selection' : selection })
       ui['treeview'] = treeview
 
       renderer = Gtk.CellRendererText()
-      column = Gtk.TreeViewColumn("Hosts", renderer, text=CC_COL_NAME)
+      column = Gtk.TreeViewColumn("Groups", renderer, text=CC_COL_NAME)
 
 
       treeview.append_column(column)
