@@ -327,7 +327,7 @@ class SSHMenu(plugin.MenuItem):
       label = Gtk.Label(label=_("Group:"))
       table.attach(label, 0, 1, 3, 4)
       group = Gtk.Entry()
-      command.set_text(group_var)
+      group.set_text(group_var)
       table.attach(group, 1, 2, 3, 4)
 
       dialog.vbox.pack_start(table, True, True, 0)
@@ -447,51 +447,50 @@ class SSHMenu(plugin.MenuItem):
       return
  
     def on_edit(self, button, data):
-      treeview = data['treeview']
-      selection = treeview.get_selection()
-      (store, iter) = selection.get_selected()
-      
-      if not iter:
-        return
-       
-      (dialog,name,command,group) = self._create_command_dialog(
+        treeview = data['treeview']
+        selection = treeview.get_selection()
+        (store, iter) = selection.get_selected()
+        
+        if not iter:
+            return
+            
+        (dialog,name,command,group) = self._create_command_dialog(
                                                 name_var = store.get_value(iter, CC_COL_NAME),
                                                 command_var = store.get_value(iter, CC_COL_COMMAND),
                                                 group_var = store.get_value(iter, CC_COL_GROUP)
-                                                                  )
-      res = dialog.run()
-      item = {}
-      if res == Gtk.ResponseType.ACCEPT:
-        item['name'] = name.get_text()
-        item['command'] = command.get_text()
-        item['group'] = group.get_text()
-        if item['name'] == '' or item['command'] == '' or item['group'] == '':
-          err = Gtk.MessageDialog(dialog,
-                                  Gtk.DialogFlags.MODAL,
-                                  Gtk.MessageType.ERROR,
-                                  Gtk.ButtonsType.CLOSE,
-                                  _("You need to define a name, command and group")
-                                )
-          err.run()
-          err.destroy()
-        else:
-          tmpiter = store.get_iter_first()
-          name_exist = False
-          while tmpiter != None:
-            if store.get_path(tmpiter) != store.get_path(iter) and store.get_value(tmpiter,CC_COL_NAME) == item['name']:
-              name_exist = True
-              break
-            tmpiter = store.iter_next(tmpiter)
-          if not name_exist:
-            store.set(iter,
-                      CC_COL_NAME, item['name'],
-                      CC_COL_COMMAND, item['command'],
-                      CC_COL_GROUP, item['group']
-                      )
-          else:
-            self._err(_("Name *%s* already exist") % item['name'])
-
-      dialog.destroy()
+                                                )
+        res = dialog.run()
+        item = {}
+        if res == Gtk.ResponseType.ACCEPT:
+            item['name'] = name.get_text()
+            item['command'] = command.get_text()
+            item['group'] = group.get_text()
+            if item['name'] == '' or item['command'] == '' or item['group'] == '':
+                err = Gtk.MessageDialog(dialog,
+                Gtk.DialogFlags.MODAL,
+                Gtk.MessageType.ERROR,
+                Gtk.ButtonsType.CLOSE,
+                _("You need to define a name, command and group")
+                )
+                err.run()
+                err.destroy()
+            else:
+                tmpiter = store.get_iter_first()
+                name_exist = False
+                while tmpiter != None:
+                    if store.get_path(tmpiter) != store.get_path(iter) and store.get_value(tmpiter,CC_COL_NAME) == item['name']:
+                        name_exist = True
+                        break
+                    tmpiter = store.iter_next(tmpiter)
+                if not name_exist:
+                    store.set(iter,
+                    CC_COL_NAME, item['name'],
+                    CC_COL_COMMAND, item['command'],
+                    CC_COL_GROUP, item['group']
+                    )
+                else:
+                    self._err(_("Name *%s* already exist") % item['name'])
+        dialog.destroy()
  
       
 if __name__ == '__main__':
