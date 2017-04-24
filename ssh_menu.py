@@ -355,12 +355,12 @@ class SSHMenu(plugin.MenuItem):
         item['name'] = name.get_text()
         item['command'] = command.get_text()
         item['group'] = group.get_text()
-        if item['name'] == '' or item['command'] == '':
+        if item['name'] == '' or item['command'] == '' or item['group'] == '':
           err = Gtk.MessageDialog(dialog,
                                   Gtk.DialogFlags.MODAL,
                                   Gtk.MessageType.ERROR,
                                   Gtk.ButtonsType.CLOSE,
-                                  _("You need to define a name and command")
+                                  _("You need to define a name, command and group")
                                 )
           err.run()
           err.destroy()
