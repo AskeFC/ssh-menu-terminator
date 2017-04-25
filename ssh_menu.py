@@ -63,6 +63,8 @@ class SSHMenu(plugin.MenuItem):
             
     def _save_config(self):
       config = Config()
+      config.plugin_del_config(self.__class__.__name__)
+      config.save()
       i = 0
       length = len(self.cmd_list)
       while i < length:
