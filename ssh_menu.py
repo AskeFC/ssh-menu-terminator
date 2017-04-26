@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# Terminator by Chris Jones, Stephen Boddy et al
+# GPL v2 only
 # ssh_menu.py - Terminator plugin to add an SSH / command menu
 #
 # Original version by Mario Lameiras, 2014
@@ -127,16 +130,16 @@ class SSHMenu(plugin.MenuItem):
       allgroups = []
       groupnum = len(self.cmd_list)
       for elem in range(groupnum):
-		  allgroups.append(self.cmd_list[elem]['group'])
+        allgroups.append(self.cmd_list[elem]['group'])
       groups = list(set(allgroups))
       
       store = Gtk.TreeStore(str,str,str)
       
       for group in groups:
-		  rabbit = store.append(None, [group,"blah","blah"])
-		  subgroup = [d for d in self.cmd_list if d['group'] == group]
-		  for command in subgroup:
-			  store.append(rabbit,[command['name'], command['command'], command['group']])
+        rabbit = store.append(None, [group,"blah","blah"])
+        subgroup = [d for d in self.cmd_list if d['group'] == group]
+        for command in subgroup:
+          store.append(rabbit,[command['name'], command['command'], command['group']])
  
       treeview = Gtk.TreeView(store)
       selection = treeview.get_selection()
@@ -449,50 +452,48 @@ class SSHMenu(plugin.MenuItem):
       return
  
     def on_edit(self, button, data):
-        treeview = data['treeview']
-        selection = treeview.get_selection()
-        (store, iter) = selection.get_selected()
-        
-        if not iter:
-            return
-            
-        (dialog,name,command,group) = self._create_command_dialog(
+      treeview = data['treeview']
+      selection = treeview.get_selection()
+      (store, iter) = selection.get_selected()
+      
+      if not iter:
+        return
+       
+      (dialog,name,command) = self._create_command_dialog(
                                                 name_var = store.get_value(iter, CC_COL_NAME),
-                                                command_var = store.get_value(iter, CC_COL_COMMAND),
-                                                group_var = store.get_value(iter, CC_COL_GROUP)
-                                                )
-        res = dialog.run()
-        item = {}
-        if res == Gtk.ResponseType.ACCEPT:
-            item['name'] = name.get_text()
-            item['command'] = command.get_text()
-            item['group'] = group.get_text()
-            if item['name'] == '' or item['command'] == '' or item['group'] == '':
-                err = Gtk.MessageDialog(dialog,
-                Gtk.DialogFlags.MODAL,
-                Gtk.MessageType.ERROR,
-                Gtk.ButtonsType.CLOSE,
-                _("You need to define a name, command and group")
-                )
-                err.run()
-                err.destroy()
-            else:
-                tmpiter = store.get_iter_first()
-                name_exist = False
-                while tmpiter != None:
-                    if store.get_path(tmpiter) != store.get_path(iter) and store.get_value(tmpiter,CC_COL_NAME) == item['name']:
-                        name_exist = True
-                        break
-                    tmpiter = store.iter_next(tmpiter)
-                if not name_exist:
-                    store.set(iter,
-                    CC_COL_NAME, item['name'],
-                    CC_COL_COMMAND, item['command'],
-                    CC_COL_GROUP, item['group']
-                    )
-                else:
-                    self._err(_("Name *%s* already exist") % item['name'])
-        dialog.destroy()
+                                                command_var = store.get_value(iter, CC_COL_COMMAND)
+                                                                  )
+      res = dialog.run()
+      item = {}
+      if res == Gtk.ResponseType.ACCEPT:
+        item['name'] = name.get_text()
+        item['command'] = command.get_text()
+        if item['name'] == '' or item['command'] == '':
+          err = Gtk.MessageDialog(dialog,
+                                  Gtk.DialogFlags.MODAL,
+                                  Gtk.MessageType.ERROR,
+                                  Gtk.ButtonsType.CLOSE,
+                                  _("You need to define a name and command")
+                                )
+          err.run()
+          err.destroy()
+        else:
+          tmpiter = store.get_iter_first()
+          name_exist = False
+          while tmpiter != None:
+            if store.get_path(tmpiter) != store.get_path(iter) and store.get_value(tmpiter,CC_COL_NAME) == item['name']:
+              name_exist = True
+              break
+            tmpiter = store.iter_next(tmpiter)
+          if not name_exist:
+            store.set(iter,
+                      CC_COL_NAME, item['name'],
+                      CC_COL_COMMAND, item['command']
+                      )
+          else:
+            self._err(_("Name *%s* already exist") % item['name'])
+
+      dialog.destroy()
  
       
 if __name__ == '__main__':
