@@ -459,21 +459,23 @@ class SSHMenu(plugin.MenuItem):
       if not iter:
         return
        
-      (dialog,name,command) = self._create_command_dialog(
+      (dialog,name,command,group) = self._create_command_dialog(
                                                 name_var = store.get_value(iter, CC_COL_NAME),
-                                                command_var = store.get_value(iter, CC_COL_COMMAND)
+                                                command_var = store.get_value(iter, CC_COL_COMMAND),
+                                                group_var = store.get_value(iter, CC_COL_GROUP)
                                                                   )
       res = dialog.run()
       item = {}
       if res == Gtk.ResponseType.ACCEPT:
         item['name'] = name.get_text()
         item['command'] = command.get_text()
-        if item['name'] == '' or item['command'] == '':
+        item['group'] = group.get_text()
+        if item['name'] == '' or item['command'] == '' or item['group'] == '':
           err = Gtk.MessageDialog(dialog,
                                   Gtk.DialogFlags.MODAL,
                                   Gtk.MessageType.ERROR,
                                   Gtk.ButtonsType.CLOSE,
-                                  _("You need to define a name and command")
+                                  _("You need to define a name, command and group")
                                 )
           err.run()
           err.destroy()
@@ -488,7 +490,8 @@ class SSHMenu(plugin.MenuItem):
           if not name_exist:
             store.set(iter,
                       CC_COL_NAME, item['name'],
-                      CC_COL_COMMAND, item['command']
+                      CC_COL_COMMAND, item['command'],
+                      CC_COL_GROUP, item['group']
                       )
           else:
             self._err(_("Name *%s* already exist") % item['name'])
