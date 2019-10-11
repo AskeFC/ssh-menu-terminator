@@ -11,7 +11,9 @@ Installing SSH Menu is as simple as copying ssh_menu.py to ~/.config/terminator/
 How to use it
 -------------
 
-Following installation, you should have a new 'SSH menu' option within the Terminator context (right click) menu. Selecting this menu option will open the SSH Menu window. From here you can use the 'Configure' button to add new commands to SSH menu.
+Following installation, you should have a new 'SSH menu' option within the Terminator context (right click) menu. Selecting this menu option will open the SSH Menu window. From here you can use the 'Configure' button to add new commands to SSH menu. All connections will open in a new tab.
+
+Furthermore you will have a new "SSH Hosts" option which extends treelike with all the SSh-Hosts you setup in the config dialog. Clicking on one of the menu entries will open an ssh connection in a new tab.
 
 Whilst it is expected most people will use this plugin to store and launch ssh sessions via ssh commands, it can be used to store and run any shell command. Due to the lack of encryption, it is recommended you do not use this plugin to store passwords or other sensitive data.
 
