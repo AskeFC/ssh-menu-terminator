@@ -62,7 +62,11 @@ class SSHMenu(plugin.MenuItem):
 		#  menuitem = Gtk.ImageMenuItem(Gtk.STOCK_PREFERENCES)
 		#  menuitem.connect("activate", self.configure)
 		#  submenu.append(menuitem)
-      
+      		#
+      		# added context menu entry opening treelike using submenus 
+      		# 2019-09-22 by tuxlog
+      		#
+      		# open new tab
 		allgroups = []
 		groupnum = len(self.cmd_list)
 		for elem in range(groupnum):
