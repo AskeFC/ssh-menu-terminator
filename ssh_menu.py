@@ -5,6 +5,7 @@
 #
 # Original version by Mario Lameiras, 2014
 # GTK3 port by Dan MacDonald, 2017
+# menu extension by Hans Matzen (tuxlogger), 2019
 
 import sys
 import os
@@ -50,19 +51,42 @@ class SSHMenu(plugin.MenuItem):
                               }
                             )
     def callback(self, menuitems, menu, terminal):
-        """Add our menu items to the menu"""
-        item = Gtk.MenuItem(_('SSH Menu'))
-        item.connect("activate", self.menu, terminal)
-        menuitems.append(item)
+		"""Add our menu items to the menu"""
+		item = Gtk.MenuItem(_('SSH Menu'))
+		item.connect("activate", self.menu, terminal)
+		menuitems.append(item)
 
+		#  submenu = Gtk.Menu()
+		#  item.set_submenu(submenu)
 
-      #  submenu = Gtk.Menu()
-      #  item.set_submenu(submenu)
-
-      #  menuitem = Gtk.ImageMenuItem(Gtk.STOCK_PREFERENCES)
-      #  menuitem.connect("activate", self.configure)
-      #  submenu.append(menuitem)
-
+		#  menuitem = Gtk.ImageMenuItem(Gtk.STOCK_PREFERENCES)
+		#  menuitem.connect("activate", self.configure)
+		#  submenu.append(menuitem)
+      
+		allgroups = []
+		groupnum = len(self.cmd_list)
+		for elem in range(groupnum):
+			allgroups.append(self.cmd_list[elem]['group'])
+		groups = list(set(allgroups))
+      
+		sshmenu1 = Gtk.Menu()
+		sshsubmenu1 = Gtk.MenuItem("SSH Hosts")
+		sshsubmenu1.set_submenu(sshmenu1)
+   
+		for group in groups:
+			sshmenu2 = Gtk.Menu()
+			sshsubmenu2 = Gtk.MenuItem(group)
+			sshsubmenu2.set_submenu(sshmenu2)
+			sshmenu1.append(sshsubmenu2)
+			
+			
+			subgroup = [d for d in self.cmd_list if d['group'] == group]
+			for command in subgroup:
+				sshsubmenu3 = Gtk.MenuItem( command['name'] )
+				sshsubmenu3.connect("activate", self._execute_from_menu, terminal, command['command'] )
+				sshmenu2.append( sshsubmenu3 )
+		
+		menuitems.append(sshsubmenu1)
             
     def _save_config(self):
       config = Config()
@@ -84,10 +108,8 @@ class SSHMenu(plugin.MenuItem):
         config.save()
         i = i + 1
 
-
     #def _save_order(self,selection, data):
      # print "todo!"
-
 
     def _execute(self, treeview, path, view_column, data):
       (model, iter) = data['selection'].get_selected()
@@ -95,7 +117,19 @@ class SSHMenu(plugin.MenuItem):
       if command[len(command)-1] != '\n':
         command = command + '\n'
       length=len(command)
-      data['terminal'].vte.feed_child(command, length)
+      
+      #
+      # changed to open a new tab on every execution 
+      # 2019-09-22 by tuxlog
+      #
+      # open new tab
+      data['terminal'].get_toplevel().tab_new()
+      # get focussed terminal
+      focterm=data['terminal'].get_toplevel().get_focussed_terminal()
+      # send command to focussed terminal
+      focterm.vte.feed_child(command, length)
+      
+      # previous code: data['terminal'].vte.feed_child(command, length)
 
 
     def menu(self, widget, terminal, data = None):
@@ -159,6 +193,8 @@ class SSHMenu(plugin.MenuItem):
 
       treeview.set_reorderable(True)
       treeview.set_enable_search(True)
+      # expand all nodes to get quicker, HM, 29.09.2019
+      treeview.expand_all()
 
 
       hbox = Gtk.HBox()
@@ -498,9 +534,20 @@ class SSHMenu(plugin.MenuItem):
 
       dialog.destroy()
  
+    def _execute_from_menu(self, widget, terminal, command):
+		if command[len(command)-1] != '\n':
+			command = command + '\n'
+		length=len(command)
+		
+		# open new tab
+		terminal.get_toplevel().tab_new()
+		# get focussed terminal
+		focterm=terminal.get_toplevel().get_focussed_terminal()
+		# send command to focussed terminal
+		focterm.vte.feed_child(command, length)
+		
       
 if __name__ == '__main__':
   c = SSHMenu()
   c.configure(None, None)
   Gtk.main()
-
