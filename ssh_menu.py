@@ -38,8 +38,8 @@ class SSHMenu(plugin.MenuItem):
           return
       for part in sections:
         s = sections[part]
-        if not (s.has_key("name") and s.has_key("command")):
-          print "SSHMenu: Ignoring section %s" % s
+        if not (s.__contains__("name") and s.__contains__("command")):
+          print "SSHMenu: Ignoring section {s}"
           continue
         name = s["name"]
         command = s["command"]
@@ -120,7 +120,6 @@ class SSHMenu(plugin.MenuItem):
       command = model.get_value(iter,1)
       if command[len(command)-1] != '\n':
         command = command + '\n'
-      length=len(command)
 
       #
       # changed to open a new tab on every execution
@@ -131,8 +130,7 @@ class SSHMenu(plugin.MenuItem):
       # get focussed terminal
       focterm=data['terminal'].get_toplevel().get_focussed_terminal()
       # send command to focussed terminal
-      focterm.vte.feed_child(command, length)
-      # previous code: data['terminal'].vte.feed_child(command, length)
+      focterm.vte.feed_child(command.encode('utf-8'))
 
     def menu(self, widget, terminal, data = None):
       ui = {}
@@ -515,14 +513,13 @@ class SSHMenu(plugin.MenuItem):
     def _execute_from_menu(self, widget, terminal, command):
 	if command[len(command)-1] != '\n':
 		command = command + '\n'
-	length=len(command)
 
 	# open new tab
 	terminal.get_toplevel().tab_new()
 	# get focussed terminal
 	focterm=terminal.get_toplevel().get_focussed_terminal()
 	# send command to focussed terminal
-	focterm.vte.feed_child(command, length)
+	focterm.vte.feed_child(command.encode('utf-8'))
 
 if __name__ == '__main__':
   c = SSHMenu()
