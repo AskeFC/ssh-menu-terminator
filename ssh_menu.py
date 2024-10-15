@@ -165,6 +165,7 @@ class SSHMenu(plugin.MenuItem):
         for elem in range(groupnum):
             allgroups.append(self.cmd_list[elem]['group'])
         groups = list(set(allgroups))
+        groups.sort()
 
         store = Gtk.TreeStore(str, str, str)
 
