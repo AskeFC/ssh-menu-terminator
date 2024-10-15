@@ -190,7 +190,7 @@ class SSHMenu(plugin.MenuItem):
         treeview.set_reorderable(True)
         treeview.set_enable_search(True)
         # expand all nodes to get quicker, HM, 29.09.2019
-        treeview.expand_all()
+        #treeview.expand_all()
 
         hbox = Gtk.HBox()
         hbox.pack_start(treeview, True, True, 0)
