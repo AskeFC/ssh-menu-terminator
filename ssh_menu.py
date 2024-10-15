@@ -39,7 +39,7 @@ class SSHMenu(plugin.MenuItem):
       for part in sections:
         s = sections[part]
         if not (s.__contains__("name") and s.__contains__("command")):
-          print "SSHMenu: Ignoring section {s}"
+          print("SSHMenu: Ignoring section {s}")
           continue
         name = s["name"]
         command = s["command"]
