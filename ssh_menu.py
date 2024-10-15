@@ -45,53 +45,53 @@ class SSHMenu(plugin.MenuItem):
         command = s["command"]
         group = s["group"]
         self.cmd_list.append(
-                              { 'name' : name,
-                                'command' : command,
-                                'group' : group
-                              }
-                            )
+	      { 'name' : name,
+		'command' : command,
+		'group' : group
+	      }
+	    )
+
     def callback(self, menuitems, menu, terminal):
-		"""Add our menu items to the menu"""
-		item = Gtk.MenuItem(_('SSH Menu'))
-		item.connect("activate", self.menu, terminal)
-		menuitems.append(item)
+	"""Add our menu items to the menu"""
+	item = Gtk.MenuItem(_('SSH Menu'))
+	item.connect("activate", self.menu, terminal)
+	menuitems.append(item)
 
-		#  submenu = Gtk.Menu()
-		#  item.set_submenu(submenu)
+	#  submenu = Gtk.Menu()
+	#  item.set_submenu(submenu)
 
-		#  menuitem = Gtk.ImageMenuItem(Gtk.STOCK_PREFERENCES)
-		#  menuitem.connect("activate", self.configure)
-		#  submenu.append(menuitem)
-      		#
-      		# added context menu entry opening treelike using submenus 
-      		# 2019-09-22 by tuxlog
-      		#
-      		# open new tab
-		allgroups = []
-		groupnum = len(self.cmd_list)
-		for elem in range(groupnum):
-			allgroups.append(self.cmd_list[elem]['group'])
-		groups = list(set(allgroups))
-      
-		sshmenu1 = Gtk.Menu()
-		sshsubmenu1 = Gtk.MenuItem("SSH Hosts")
-		sshsubmenu1.set_submenu(sshmenu1)
-   
-		for group in groups:
-			sshmenu2 = Gtk.Menu()
-			sshsubmenu2 = Gtk.MenuItem(group)
-			sshsubmenu2.set_submenu(sshmenu2)
-			sshmenu1.append(sshsubmenu2)
-			
-			
-			subgroup = [d for d in self.cmd_list if d['group'] == group]
-			for command in subgroup:
-				sshsubmenu3 = Gtk.MenuItem( command['name'] )
-				sshsubmenu3.connect("activate", self._execute_from_menu, terminal, command['command'] )
-				sshmenu2.append( sshsubmenu3 )
-		
-		menuitems.append(sshsubmenu1)
-            
+	#  menuitem = Gtk.ImageMenuItem(Gtk.STOCK_PREFERENCES)
+	#  menuitem.connect("activate", self.configure)
+	#  submenu.append(menuitem)
+	#
+	# added context menu entry opening treelike using submenus 
+	# 2019-09-22 by tuxlog
+	#
+	# open new tab
+	allgroups = []
+	groupnum = len(self.cmd_list)
+	for elem in range(groupnum):
+		allgroups.append(self.cmd_list[elem]['group'])
+	groups = list(set(allgroups))
+
+	sshmenu1 = Gtk.Menu()
+	sshsubmenu1 = Gtk.MenuItem("SSH Hosts")
+	sshsubmenu1.set_submenu(sshmenu1)
+
+	for group in groups:
+		sshmenu2 = Gtk.Menu()
+		sshsubmenu2 = Gtk.MenuItem(group)
+		sshsubmenu2.set_submenu(sshmenu2)
+		sshmenu1.append(sshsubmenu2)
+
+		subgroup = [d for d in self.cmd_list if d['group'] == group]
+		for command in subgroup:
+			sshsubmenu3 = Gtk.MenuItem( command['name'] )
+			sshsubmenu3.connect("activate", self._execute_from_menu, terminal, command['command'] )
+			sshmenu2.append( sshsubmenu3 )
+
+	menuitems.append(sshsubmenu1)
+
     def _save_config(self):
       config = Config()
       config.plugin_del_config(self.__class__.__name__)
@@ -102,7 +102,7 @@ class SSHMenu(plugin.MenuItem):
         name = self.cmd_list[i]['name']
         command = self.cmd_list[i]['command']
         group = self.cmd_list[i]['group']
-       
+
         item = {}
         item['name'] = name
         item['command'] = command
@@ -121,9 +121,9 @@ class SSHMenu(plugin.MenuItem):
       if command[len(command)-1] != '\n':
         command = command + '\n'
       length=len(command)
-      
+
       #
-      # changed to open a new tab on every execution 
+      # changed to open a new tab on every execution
       # 2019-09-22 by tuxlog
       #
       # open new tab
@@ -132,9 +132,7 @@ class SSHMenu(plugin.MenuItem):
       focterm=data['terminal'].get_toplevel().get_focussed_terminal()
       # send command to focussed terminal
       focterm.vte.feed_child(command, length)
-      
       # previous code: data['terminal'].vte.feed_child(command, length)
-
 
     def menu(self, widget, terminal, data = None):
       ui = {}
@@ -144,13 +142,12 @@ class SSHMenu(plugin.MenuItem):
       scroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.ALWAYS)
       #scroll.set_border_width(1)
 
-
       window.set_title("SSH Menu")
       window.move(1,100)
       window.resize(200,500)
       window.set_resizable(True)
       #window. set_decorated(False)
-       # Create a new button
+      # Create a new button
       buttonsbox = Gtk.HBox(False, 0)
       box1 = Gtk.VBox(False, 0)
 
@@ -159,7 +156,6 @@ class SSHMenu(plugin.MenuItem):
 
       buttonPreferences = Gtk.Button("Configure", Gtk.STOCK_PREFERENCES)
       buttonPreferences.connect("clicked", self.configure)
-      
 
       buttonsbox.pack_start(button, True, False, 0)
       buttonsbox.pack_end(buttonPreferences, True, False, 0)
@@ -170,15 +166,15 @@ class SSHMenu(plugin.MenuItem):
       for elem in range(groupnum):
         allgroups.append(self.cmd_list[elem]['group'])
       groups = list(set(allgroups))
-      
+
       store = Gtk.TreeStore(str,str,str)
-      
+
       for group in groups:
         rabbit = store.append(None, [group,"blah","blah"])
         subgroup = [d for d in self.cmd_list if d['group'] == group]
         for command in subgroup:
           store.append(rabbit,[command['name'], command['command'], command['group']])
- 
+
       treeview = Gtk.TreeView(store)
       selection = treeview.get_selection()
       selection.set_mode(Gtk.SelectionMode.SINGLE)
@@ -190,53 +186,45 @@ class SSHMenu(plugin.MenuItem):
       renderer = Gtk.CellRendererText()
       column = Gtk.TreeViewColumn("Groups", renderer, text=CC_COL_NAME)
 
-
       treeview.append_column(column)
-
-
 
       treeview.set_reorderable(True)
       treeview.set_enable_search(True)
       # expand all nodes to get quicker, HM, 29.09.2019
       treeview.expand_all()
 
-
       hbox = Gtk.HBox()
       hbox.pack_start(treeview, True, True, 0)
 
       outbox = Gtk.VBox(False, 0)
 
-
-
       inbox = Gtk.VBox(False, 0)
       inbox.pack_start(scroll, True, True, 5)
       inbox.pack_start(box1,False, False, 8)
-
 
       scroll.add_with_viewport(hbox)
       scroll.show()
       outbox.pack_start(inbox, True, True, 0)
       window.add(outbox)
       window.show_all()
-
       return
 
     def configure(self, widget, data = None):
       ui = {}
       window = Gtk.Dialog(
-                      _("SSH Menu Configuration"),
-                      None,
-                      Gtk.DialogFlags.MODAL,
-                      (
-                        Gtk.STOCK_CANCEL, Gtk.ResponseType.REJECT,
-                        Gtk.STOCK_OK, Gtk.ResponseType.ACCEPT
-                      )
-                    )
+	      _("SSH Menu Configuration"),
+	      None,
+	      Gtk.DialogFlags.MODAL,
+	      (
+		Gtk.STOCK_CANCEL, Gtk.ResponseType.REJECT,
+		Gtk.STOCK_OK, Gtk.ResponseType.ACCEPT
+	      )
+	    )
       store = Gtk.ListStore(str, str, str)
 
       for command in self.cmd_list:
         store.append([command['name'], command['command'], command['group']])
- 
+
       treeview = Gtk.TreeView(store)
       #treeview.connect("cursor-changed", self.on_cursor_changed, ui)
       selection = treeview.get_selection()
@@ -251,7 +239,7 @@ class SSHMenu(plugin.MenuItem):
       renderer = Gtk.CellRendererText()
       column = Gtk.TreeViewColumn("Command", renderer, text=CC_COL_COMMAND)
       treeview.append_column(column)
-      
+
       renderer = Gtk.CellRendererText()
       column = Gtk.TreeViewColumn("Group", renderer, text=CC_COL_GROUP)
       treeview.append_column(column)
@@ -264,7 +252,7 @@ class SSHMenu(plugin.MenuItem):
 
       button = Gtk.Button(stock=Gtk.STOCK_GOTO_TOP)
       button_box.pack_start(button, False, True, 0)
-      button.connect("clicked", self.on_goto_top, ui) 
+      button.connect("clicked", self.on_goto_top, ui)
       button.set_sensitive(False)
       ui['button_top'] = button
 
@@ -276,34 +264,32 @@ class SSHMenu(plugin.MenuItem):
 
       button = Gtk.Button(stock=Gtk.STOCK_GO_DOWN)
       button_box.pack_start(button, False, True, 0)
-      button.connect("clicked", self.on_go_down, ui) 
+      button.connect("clicked", self.on_go_down, ui)
       button.set_sensitive(False)
       ui['button_down'] = button
 
       button = Gtk.Button(stock=Gtk.STOCK_GOTO_LAST)
       button_box.pack_start(button, False, True, 0)
-      button.connect("clicked", self.on_goto_last, ui) 
+      button.connect("clicked", self.on_goto_last, ui)
       button.set_sensitive(False)
       ui['button_last'] = button
 
       button = Gtk.Button(stock=Gtk.STOCK_NEW)
       button_box.pack_start(button, False, True, 0)
-      button.connect("clicked", self.on_new, ui) 
+      button.connect("clicked", self.on_new, ui)
       ui['button_new'] = button
 
       button = Gtk.Button(stock=Gtk.STOCK_EDIT)
       button_box.pack_start(button, False, True, 0)
       button.set_sensitive(False)
-      button.connect("clicked", self.on_edit, ui) 
+      button.connect("clicked", self.on_edit, ui)
       ui['button_edit'] = button
 
       button = Gtk.Button(stock=Gtk.STOCK_DELETE)
       button_box.pack_start(button, False, True, 0)
-      button.connect("clicked", self.on_delete, ui) 
+      button.connect("clicked", self.on_delete, ui)
       button.set_sensitive(False)
       ui['button_delete'] = button
-
-
 
       hbox.pack_start(button_box, True, True, 0)
       window.show_all()
@@ -314,26 +300,19 @@ class SSHMenu(plugin.MenuItem):
         self.cmd_list = []
         while iter:
           (name, command, group) = store.get(iter,
-                                              CC_COL_NAME,
-                                              CC_COL_COMMAND,
-                                              CC_COL_GROUP)
+	      CC_COL_NAME,
+	      CC_COL_COMMAND,
+	      CC_COL_GROUP)
           self.cmd_list.append(
-                            {'name': name,
-                            'command' : command,
-                            'group' : group}
-                              )
+		    {'name': name,
+		    'command' : command,
+		    'group' : group}
+	  	)
           iter = store.iter_next(iter)
         self._save_config()
-      
+
       window.destroy()
       return
-
-
-
-
-
-
-
 
     def on_selection_changed(self,selection, data=None):
       treeview = selection.get_tree_view()
@@ -347,14 +326,14 @@ class SSHMenu(plugin.MenuItem):
 
     def _create_command_dialog(self, name_var = "", command_var = "", group_var = ""):
       dialog = Gtk.Dialog(
-                        _("New Command"),
-                        None,
-                        Gtk.DialogFlags.MODAL,
-                        (
-                          Gtk.STOCK_CANCEL, Gtk.ResponseType.REJECT,
-                          Gtk.STOCK_OK, Gtk.ResponseType.ACCEPT
-                        )
-                      )
+		_("New Command"),
+		None,
+		Gtk.DialogFlags.MODAL,
+		(
+		  Gtk.STOCK_CANCEL, Gtk.ResponseType.REJECT,
+		  Gtk.STOCK_OK, Gtk.ResponseType.ACCEPT
+		)
+      	)
       table = Gtk.Table(3, 2)
 
       label = Gtk.Label(label=_("Name:"))
@@ -362,13 +341,13 @@ class SSHMenu(plugin.MenuItem):
       name = Gtk.Entry()
       name.set_text(name_var)
       table.attach(name, 1, 2, 1, 2)
-      
+
       label = Gtk.Label(label=_("Command:"))
       table.attach(label, 0, 1, 2, 3)
       command = Gtk.Entry()
       command.set_text(command_var)
       table.attach(command, 1, 2, 2, 3)
-      
+
       label = Gtk.Label(label=_("Group:"))
       table.attach(label, 0, 1, 3, 4)
       group = Gtk.Entry()
@@ -381,16 +360,13 @@ class SSHMenu(plugin.MenuItem):
 
     def _error(self, msg):
       err = Gtk.MessageDialog(dialog,
-                              Gtk.DialogFlags.MODAL,
-                              Gtk.MessageType.ERROR,
-                              Gtk.ButtonsType.CLOSE,
-                              msg
-                            )
+	      Gtk.DialogFlags.MODAL,
+	      Gtk.MessageType.ERROR,
+	      Gtk.ButtonsType.CLOSE,
+	      msg
+	    )
       err.run()
       err.destroy()
-
-      
-
 
     def on_new(self, button, data):
       (dialog,name,command,group) = self._create_command_dialog()
@@ -402,11 +378,11 @@ class SSHMenu(plugin.MenuItem):
         item['group'] = group.get_text()
         if item['name'] == '' or item['command'] == '' or item['group'] == '':
           err = Gtk.MessageDialog(dialog,
-                                  Gtk.DialogFlags.MODAL,
-                                  Gtk.MessageType.ERROR,
-                                  Gtk.ButtonsType.CLOSE,
-                                  _("You need to define a name, command and group")
-                                )
+		  Gtk.DialogFlags.MODAL,
+		  Gtk.MessageType.ERROR,
+		  Gtk.ButtonsType.CLOSE,
+		  _("You need to define a name, command and group")
+		)
           err.run()
           err.destroy()
         else:
@@ -429,7 +405,7 @@ class SSHMenu(plugin.MenuItem):
       treeview = data['treeview']
       selection = treeview.get_selection()
       (store, iter) = selection.get_selected()
-      
+
       if not iter:
         return
       firstiter = store.get_iter_first()
@@ -439,7 +415,7 @@ class SSHMenu(plugin.MenuItem):
       treeview = data['treeview']
       selection = treeview.get_selection()
       (store, iter) = selection.get_selected()
-       
+
       if not iter:
         return
 
@@ -459,7 +435,7 @@ class SSHMenu(plugin.MenuItem):
       treeview = data['treeview']
       selection = treeview.get_selection()
       (store, iter) = selection.get_selected()
-      
+
       if not iter:
         return
       next = store.iter_next(iter)
@@ -470,7 +446,7 @@ class SSHMenu(plugin.MenuItem):
       treeview = data['treeview']
       selection = treeview.get_selection()
       (store, iter) = selection.get_selected()
-      
+
       if not iter:
         return
       lastiter = iter
@@ -478,32 +454,30 @@ class SSHMenu(plugin.MenuItem):
       while tmpiter:
         lastiter = tmpiter
         tmpiter = store.iter_next(tmpiter)
-      
+
       store.move_after(iter, lastiter)
 
- 
     def on_delete(self, button, data):
       treeview = data['treeview']
       selection = treeview.get_selection()
       (store, iter) = selection.get_selected()
       if iter:
         store.remove(iter)
-      
       return
- 
+
     def on_edit(self, button, data):
       treeview = data['treeview']
       selection = treeview.get_selection()
       (store, iter) = selection.get_selected()
-      
+
       if not iter:
         return
-       
+
       (dialog,name,command,group) = self._create_command_dialog(
-                                                name_var = store.get_value(iter, CC_COL_NAME),
-                                                command_var = store.get_value(iter, CC_COL_COMMAND),
-                                                group_var = store.get_value(iter, CC_COL_GROUP)
-                                                                  )
+		name_var = store.get_value(iter, CC_COL_NAME),
+		command_var = store.get_value(iter, CC_COL_COMMAND),
+		group_var = store.get_value(iter, CC_COL_GROUP)
+	  )
       res = dialog.run()
       item = {}
       if res == Gtk.ResponseType.ACCEPT:
@@ -512,11 +486,11 @@ class SSHMenu(plugin.MenuItem):
         item['group'] = group.get_text()
         if item['name'] == '' or item['command'] == '' or item['group'] == '':
           err = Gtk.MessageDialog(dialog,
-                                  Gtk.DialogFlags.MODAL,
-                                  Gtk.MessageType.ERROR,
-                                  Gtk.ButtonsType.CLOSE,
-                                  _("You need to define a name, command and group")
-                                )
+		  Gtk.DialogFlags.MODAL,
+		  Gtk.MessageType.ERROR,
+		  Gtk.ButtonsType.CLOSE,
+		  _("You need to define a name, command and group")
+		)
           err.run()
           err.destroy()
         else:
@@ -537,20 +511,19 @@ class SSHMenu(plugin.MenuItem):
             self._err(_("Name *%s* already exist") % item['name'])
 
       dialog.destroy()
- 
+
     def _execute_from_menu(self, widget, terminal, command):
-		if command[len(command)-1] != '\n':
-			command = command + '\n'
-		length=len(command)
-		
-		# open new tab
-		terminal.get_toplevel().tab_new()
-		# get focussed terminal
-		focterm=terminal.get_toplevel().get_focussed_terminal()
-		# send command to focussed terminal
-		focterm.vte.feed_child(command, length)
-		
-      
+	if command[len(command)-1] != '\n':
+		command = command + '\n'
+	length=len(command)
+
+	# open new tab
+	terminal.get_toplevel().tab_new()
+	# get focussed terminal
+	focterm=terminal.get_toplevel().get_focussed_terminal()
+	# send command to focussed terminal
+	focterm.vte.feed_child(command, length)
+
 if __name__ == '__main__':
   c = SSHMenu()
   c.configure(None, None)
